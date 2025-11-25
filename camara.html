@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cámara Lector ArUco</title>
+    <style>
+      body { margin: 0; background: black; overflow: hidden; }
+      #status {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-family: sans-serif;
+        font-size: 16px;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status">Inicializando cámara...</div>
+
+    <!-- MUY IMPORTANTE: según la doc, estos scripts van APENAS debajo de <body> -->
+    <script src="https://app.protobject.com/framework/p.js"></script>
+    <script src="config.js"></script>
+
+    <script>
+      const statusDiv = document.getElementById("status");
+
+      // 1) Empezar la detección de ArUco (igual que en el ejemplo)
+      //    genera eventos cada 200 ms, usa la cámara con id 0 (webcam por defecto)
+      Protobject.Aruco.start(200, 0);
+
+      // 2) Mostrar la vista previa de la cámara
+      //    (a pantalla completa)
+      Protobject.Aruco.showPreview({
+        top: 0,
+        left: 0,
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+
+      statusDiv.textContent = "Cámara lista, apunta un código ArUco.";
+
+      // 3) Recibir datos de los marcadores
+      Protobject.Aruco.onData((data) => {
+        // data tiene forma: { "id": { position: {x,y}, size }, ... }
+        const ids = Object.keys(data).map(id => Number(id));
+        console.log("📷 ArUco data:", data, "IDs:", ids);
+
+        if (ids.length > 0) {
+          // Enviar los IDs a la página de la luz
+          Protobject.Core.send(ids).to("luz.html");
+
+          statusDiv.textContent = "Detectado: " + ids.join(", ");
+          statusDiv.style.background = "rgba(0,128,0,0.6)";
+        } else {
+          // Si no ve nada, mandamos lista vacía
+          Protobject.Core.send([]).to("luz.html");
+
+          statusDiv.textContent = "No se detectan códigos.";
+          statusDiv.style.background = "rgba(0,0,0,0.6)";
+        }
+      });
+    </script>
+  </body>
+</html>

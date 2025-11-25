@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luz Maestra Van Gogh</title>
+    
+
+  </head>
+  <body>
+    <script src="https://app.protobject.com/framework/p.js"></script>
+    <script src="config.js"></script>
+    <script>
+  // ==================== 1. VARIABLES ====================
+  let C_i = { r: 0, g: 0, b: 0 };
+  let C_f = { r: 0, g: 0, b: 0 };
+  let progress = 0.0;
+
+  const FADE_SPEED = 0.02;   // velocidad del fade
+  const HOLD_TIME  = 600;    // pausa entre colores (ms)
+
+  let isFading   = false;
+  let holdTimer  = null;
+  let lampInstance;
+
+  let data_van_gogh = [];
+  let isDataLoaded  = false;
+
+  // Paleta activa y loop
+  let baseColors   = [];     // colores actuales en loop infinito
+  let currentIndex = -1;     // índice dentro de baseColors
+  let lastArucoKey = "";     // para detectar cambios de combinación de IDs
+    let lastSeenMap = {}; // id -> timestamp (ms) de la última vez que se vio ese código
+
+  // Auto-apagado tras 30s sin códigos
+  let autoOffTimer    = null;
+  const AUTO_OFF_DELAY = 30000; // 30 segundos
+
+  // ==================== 2. UTILIDADES ====================
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    const num = parseInt(hex, 16);
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255
+    };
+  }
+
+  function hexToHSL(H) {
+    // Convierte #rrggbb a {h,s,l}
+    let r = 0, g = 0, b = 0;
+    H = H.replace('#', '');
+    if (H.length === 3) {
+      r = '0x' + H[0] + H[0];
+      g = '0x' + H[1] + H[1];
+      b = '0x' + H[2] + H[2];
+    } else {
+      r = '0x' + H[0] + H[1];
+      g = '0x' + H[2] + H[3];
+      b = '0x' + H[4] + H[5];
+    }
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const cmin = Math.min(r, g, b);
+    const cmax = Math.max(r, g, b);
+    const delta = cmax - cmin;
+    let h = 0, s = 0, l = 0;
+
+    if (delta === 0) h = 0;
+    else if (cmax === r) h = ((g - b) / delta) % 6;
+    else if (cmax === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+
+    l = (cmax + cmin) / 2;
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    return { h, s: s * 100, l: l * 100 };
+  }
+
+  function ordenarPorColor_RYB(colors) {
+    function key(cHex) {
+      const { h, s, l } = hexToHSL(cHex);
+      // Mapeo simple a buckets RYB (no perfecto pero sirve para agrupar visualmente)
+      let hue = h;
+      let bucket = 0;
+      let pos = 0;
+
+      if      (hue < 60)  { bucket = 0; pos = hue; }          // rojo → amarillo
+      else if (hue < 180) { bucket = 1; pos = hue - 60; }     // amarillo → verde/cian
+      else                { bucket = 2; pos = hue - 180; }    // azul → magenta
+
+      return [bucket, pos, -s, l];
+    }
+
+    return [...colors].sort((a, b) => {
+      const ka = key(a);
+      const kb = key(b);
+      return (ka[0] - kb[0]) ||
+             (ka[1] - kb[1]) ||
+             (ka[2] - kb[2]) ||
+             (ka[3] - kb[3]);
+    });
+  }
+
+  // ==================== 3. LÓGICA DE MEZCLA ====================
+  function getCombinedColors(arucoIds) {
+    if (!isDataLoaded) return [];
+
+    let combinedColors = [];
+
+    arucoIds.forEach(id => {
+      const artwork = data_van_gogh.find(
+        item => Number(item.ArucoID) === Number(id)
+      );
+      if (artwork) {
+        const colors = String(artwork.Colors)
+          .replace(/[()]/g, '')
+          .split(/\s*,\s*/)
+          .map(s => s.replace(/'/g, '').trim())
+          .filter(s => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s));
+        combinedColors = combinedColors.concat(colors);
+      }
+    });
+
+    if (combinedColors.length === 0) return [];
+    return ordenarPorColor_RYB(combinedColors);
+  }
+
+  // ==================== 4. ANIMACIÓN ====================
+  function startNextFade() {
+    if (holdTimer) clearTimeout(holdTimer);
+
+    if (!baseColors || baseColors.length === 0) {
+      isFading = false;
+      if (lampInstance) lampInstance.setColor({ r: 0, g: 0, b: 0 });
+      return;
+    }
+
+    C_i = C_f;
+    currentIndex = (currentIndex + 1) % baseColors.length;
+    const nextHex = baseColors[currentIndex];
+    C_f = hexToRgb(nextHex);
+    progress = 0.0;
+    isFading = true;
+  }
+
+  function mainAnimationLoop() {
+    if (!isFading) return;
+
+    progress += FADE_SPEED;
+
+    if (progress >= 1.0) {
+      progress = 1.0;
+      isFading = false;
+
+      if (lampInstance) {
+        lampInstance.setColor({ r: C_f.r, g: C_f.g, b: C_f.b });
+      }
+
+      holdTimer = setTimeout(startNextFade, HOLD_TIME);
+      return;
+    }
+
+    const cR = Math.round(lerp(C_i.r, C_f.r, progress));
+    const cG = Math.round(lerp(C_i.g, C_f.g, progress));
+    const cB = Math.round(lerp(C_i.b, C_f.b, progress));
+
+    if (lampInstance) {
+      lampInstance.setColor({ r: cR, g: cG, b: cB });
+    }
+  }
+
+  // ==================== 5. RECEPCIÓN DE MENSAJES ====================
+// TIMER DE AUTO-APAGADO
+
+    const MEMORY_WINDOW  = 10000; // 10 segundos para mezclar códigos seguidos
+
+    Protobject.Core.onReceived(function(message) {
+        console.log("💡 Luz recibió mensaje:", message);
+
+        if (!Array.isArray(message)) return;
+
+        // ================== 1) CASO SIN CÓDIGOS ==================
+        if (message.length === 0) {
+            console.log("💡 Sin códigos, iniciando temporizador de apagado…");
+
+            if (!autoOffTimer) {
+                autoOffTimer = setTimeout(() => {
+                    console.log("⏳ 30s sin códigos → apagando luz.");
+
+                    baseColors   = [];
+                    currentIndex = -1;
+                    lastArucoKey = "";
+                    isFading     = false;
+                    lastSeenMap  = {};   // limpiamos el historial también
+
+                    if (holdTimer) clearTimeout(holdTimer);
+                    if (lampInstance) lampInstance.setColor({ r: 0, g: 0, b: 0 });
+
+                    autoOffTimer = null;
+                }, AUTO_OFF_DELAY);
+            }
+
+            // Durante esos 30s el show actual sigue corriendo en loop
+            return;
+        }
+
+        // ================== 2) HAY CÓDIGOS → CANCELAR AUTO-OFF ==================
+        if (autoOffTimer) {
+            console.log("🚫 Se detectaron códigos → cancelando apagado automático.");
+            clearTimeout(autoOffTimer);
+            autoOffTimer = null;
+        }
+
+        // ================== 3) ACTUALIZAR HISTORIAL DE 10s ==================
+        const now = Date.now();
+
+        // Registrar los IDs que vemos en ESTE frame
+        message.forEach(id => {
+            const n = Number(id);
+            if (!isNaN(n)) {
+                lastSeenMap[n] = now;
+            }
+        });
+
+        // Eliminar IDs que no se han visto en los últimos 10 segundos
+        for (const id in lastSeenMap) {
+            if (now - lastSeenMap[id] > MEMORY_WINDOW) {
+                delete lastSeenMap[id];
+            }
+        }
+
+        // IDs activos en la ventana de 10 segundos
+        const activeIds = Object.keys(lastSeenMap).map(x => Number(x));
+        console.log("🧠 IDs activos en últimos 10s:", activeIds);
+
+        if (activeIds.length === 0) {
+            // Muy raro, pero por si acaso: apagamos
+            baseColors   = [];
+            currentIndex = -1;
+            lastArucoKey = "";
+            isFading     = false;
+            if (holdTimer) clearTimeout(holdTimer);
+            if (lampInstance) lampInstance.setColor({ r: 0, g: 0, b: 0 });
+            return;
+        }
+
+        // Llave única según TODOS los IDs activos (simultáneos + seguidos)
+        const key = activeIds.slice().sort((a,b)=>a-b).join(",");
+
+        // Si la combinación efectiva no cambió, no tocamos la paleta
+        if (key === lastArucoKey) {
+            return;
+        }
+
+        lastArucoKey = key;
+
+        // ================== 4) NUEVA PALETA PARA ESA COMBINACIÓN ==================
+        const newColors = getCombinedColors(activeIds);
+        console.log("🎨 Nueva paleta para", key, ":", newColors);
+
+        if (newColors.length === 0) {
+            baseColors   = [];
+            currentIndex = -1;
+            isFading     = false;
+            if (holdTimer) clearTimeout(holdTimer);
+            if (lampInstance) lampInstance.setColor({ r: 0, g: 0, b: 0 });
+            return;
+        }
+
+        // Actualizar paleta base y reiniciar el ciclo
+        baseColors   = newColors;
+        currentIndex = -1;
+
+        if (!isFading && !holdTimer) {
+            startNextFade();
+        }
+    });
+
+
+    // ==================== 6. INICIALIZACIÓN ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('van_gogh_filtrado.json')
+        .then(r => r.json())
+        .then(d => {
+            data_van_gogh = d;
+            isDataLoaded  = true;
+            console.log("✅ JSON cargado");
+        })
+        .catch(e => console.error("Error JSON:", e));
+
+        // Lámpara a pantalla completa
+        lampInstance = new Protobject.Lamp({
+        width: "100%",
+        height: "100%",
+        color: '#000000'
+        });
+
+        function loop() {
+        mainAnimationLoop();
+        requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+    });
+    </script>
+  </body>
+</html>
