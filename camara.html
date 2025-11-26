@@ -53,13 +53,13 @@
 
         if (ids.length > 0) {
           // Enviar los IDs a la página de la luz
-          Protobject.Core.send(ids).to("luz.html");
+          Protobject.Core.send(ids).to("index.html");
 
           statusDiv.textContent = "Detectado: " + ids.join(", ");
           statusDiv.style.background = "rgba(0,128,0,0.6)";
         } else {
           // Si no ve nada, mandamos lista vacía
-          Protobject.Core.send([]).to("luz.html");
+          Protobject.Core.send([]).to("index.html");
 
           statusDiv.textContent = "No se detectan códigos.";
           statusDiv.style.background = "rgba(0,0,0,0.6)";
