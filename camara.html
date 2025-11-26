@@ -59,30 +59,13 @@
         startBtn.style.display = "none";
         statusDiv.textContent  = "Inicializando cámara...";
 
-        let started = false;
-
-        // 1) Intentar iniciar la detección ArUco (cámara)
         try {
-          // Primero probamos con la cámara 1 (trasera en muchos dispositivos)
-          Protobject.Aruco.start(60, 1);
-          console.log("✅ ArUco start(60, 1)");
-          started = true;
-        } catch (e1) {
-          console.warn("No se pudo usar cámara 1, probando cámara 0:", e1);
-          try {
-            Protobject.Aruco.start(60, 0);
-            console.log("✅ ArUco start(60, 0)");
-            started = true;
-          } catch (e2) {
-            console.error("❌ No se pudo iniciar ArUco en ninguna cámara:", e2);
-            statusDiv.textContent = "No se pudo iniciar la cámara. Revisa permisos.";
-            statusDiv.style.background = "rgba(128,0,0,0.8)";
-            return;
-          }
-        }
-
-        if (!started) {
-          statusDiv.textContent = "No se pudo iniciar la cámara.";
+          // 👇 Usar SIEMPRE la cámara 0 (dispositivo por defecto)
+          Protobject.Aruco.start(60, 0);
+          console.log("✅ ArUco start(60, 0)");
+        } catch (e) {
+          console.error("❌ No se pudo iniciar ArUco:", e);
+          statusDiv.textContent = "No se pudo iniciar la cámara. Revisa permisos.";
           statusDiv.style.background = "rgba(128,0,0,0.8)";
           return;
         }
@@ -90,7 +73,7 @@
         statusDiv.textContent = "Cámara lista, apunta un código ArUco.";
         statusDiv.style.background = "rgba(0,0,0,0.6)";
 
-        // 2) Callback de detección (aunque no veamos el video)
+        // Aunque no veamos el vídeo, la detección sigue funcionando
         Protobject.Aruco.onData((data) => {
           const ids = Object.keys(data).map(id => Number(id));
           console.log("📷 ArUco data:", data, "IDs:", ids);
@@ -107,7 +90,6 @@
         });
       }
 
-      // Iniciar SOLO después de interacción del usuario
       startBtn.addEventListener("click", initAruco);
     </script>
   </body>
