@@ -21,63 +21,88 @@
     </style>
   </head>
   <body>
+    <body>
+  <div id="status"
+       style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+              padding:10px 20px;border-radius:8px;
+              background:rgba(0,0,0,0.6);color:white;
+              font-family:sans-serif;z-index:10;">
+    Toca el botón para iniciar la cámara.
+  </div>
+
+  <button id="startBtn"
+          style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+                 padding:12px 24px;border-radius:8px;border:none;
+                 background:#007bff;color:white;font-size:16px;
+                 font-family:sans-serif;z-index:20;">
+    Iniciar cámara
+  </button>
+
+  <script src="https://app.protobject.com/framework/p.js"></script>
+  <script src="config.js"></script>
+
     <div id="status">Inicializando cámara...</div>
+    
 
-    <!-- MUY IMPORTANTE: según la doc, estos scripts van APENAS debajo de <body> -->
-    <script src="https://app.protobject.com/framework/p.js"></script>
-    <script src="config.js"></script>
+     <script>
+    const statusDiv = document.getElementById("status");
+    const startBtn  = document.getElementById("startBtn");
 
-   <script>
-  const statusDiv = document.getElementById("status");
+    function initAruco() {
+      // Ocultamos el botón, ya hubo interacción
+      startBtn.style.display = "none";
+      statusDiv.textContent  = "Inicializando cámara...";
 
-  // 1) Mostrar vista previa de la cámara (más liviano)
-  Protobject.Aruco.showPreview({
-    top: 0,
-    left: 0,
-    width: window.innerWidth,
-    height: window.innerHeight
-    // Si sigue pesado, puedes probar width: 1280/3, height: 720/3
-  });
+      // Mostrar vista previa (video)
+      Protobject.Aruco.showPreview({
+        top: 0,
+        left: 0,
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
 
-  // 2) Intentar usar la cámara trasera (id = 1), si falla probamos con 0
-  function startAruco() {
-    try {
-      // Intervalo 60ms (no tan agresivo como 30ms, mejor para celular)
-      Protobject.Aruco.start(60, 1); // 👈 trasera
-      statusDiv.textContent = "Cámara lista, apunta un código ArUco.";
-      console.log("✅ ArUco start(60, 1)");
-    } catch (e) {
-      console.warn("No se pudo usar cámara 1, probando con 0:", e);
+      // Intentamos cámara trasera (1), si no, frontal (0)
       try {
-        Protobject.Aruco.start(60, 0); // 👈 frontal como fallback
-        statusDiv.textContent = "Cámara lista (cam 0), apunta un código ArUco.";
-        console.log("✅ ArUco start(60, 0)");
-      } catch (err) {
-        console.error("❌ No se pudo iniciar ArUco:", err);
-        statusDiv.textContent = "No se pudo iniciar la cámara. Revisa permisos.";
-        statusDiv.style.background = "rgba(128,0,0,0.6)";
+        Protobject.Aruco.start(60, 1);
+        console.log("✅ ArUco start(60, 1)");
+      } catch (e) {
+        console.warn("No se pudo usar cámara 1, probando con 0:", e);
+        try {
+          Protobject.Aruco.start(60, 0);
+          console.log("✅ ArUco start(60, 0)");
+        } catch (err) {
+          console.error("❌ No se pudo iniciar ArUco:", err);
+          statusDiv.textContent = "No se pudo iniciar la cámara. Revisa permisos.";
+          statusDiv.style.background = "rgba(128,0,0,0.6)";
+          return;
+        }
       }
+
+      statusDiv.textContent = "Cámara lista, apunta un código ArUco.";
+
+      // Callback de detección
+      Protobject.Aruco.onData((data) => {
+        const ids = Object.keys(data).map(id => Number(id));
+        console.log("📷 ArUco data:", data, "IDs:", ids);
+
+        if (ids.length > 0) {
+          Protobject.Core.send(ids).to("index.html");
+          statusDiv.textContent = "Detectado: " + ids.join(", ");
+          statusDiv.style.background = "rgba(0,128,0,0.6)";
+        } else {
+          Protobject.Core.send([]).to("index.html");
+          statusDiv.textContent = "No se detectan códigos.";
+          statusDiv.style.background = "rgba(0,0,0,0.6)";
+        }
+      });
     }
-  }
 
-  startAruco();
+    // Muy importante: iniciar SOLO en respuesta a un tap
+    startBtn.addEventListener("click", initAruco);
+  </script>
+</body>
+</html>
 
-  // 3) Recibir datos de los marcadores
-  Protobject.Aruco.onData((data) => {
-    const ids = Object.keys(data).map(id => Number(id));
-    console.log("📷 ArUco data:", data, "IDs:", ids);
-
-    if (ids.length > 0) {
-      Protobject.Core.send(ids).to("index.html");
-      statusDiv.textContent = "Detectado: " + ids.join(", ");
-      statusDiv.style.background = "rgba(0,128,0,0.6)";
-    } else {
-      Protobject.Core.send([]).to("index.html");
-      statusDiv.textContent = "No se detectan códigos.";
-      statusDiv.style.background = "rgba(0,0,0,0.6)";
-    }
-  });
-</script>
 
   </body>
 </html>
