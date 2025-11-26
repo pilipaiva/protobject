@@ -1,4 +1,4 @@
-Protobject.setProduction(false);
+Protobject.setProduction(true);
 Protobject.initialize([
   { 
     name: "Luz_VanGogh",           // AHORA ES EL MASTER
