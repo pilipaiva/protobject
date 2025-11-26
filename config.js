@@ -2,7 +2,7 @@ Protobject.setProduction(false);
 Protobject.initialize([
   { 
     name: "Luz_VanGogh",           // AHORA ES EL MASTER
-    page: "luz.html",
+    page: "index.html",
     main: true,                    // <--- Importante
     debug: "master",
   },
