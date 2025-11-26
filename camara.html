@@ -61,7 +61,7 @@
 
         let started = false;
 
-        // 1) Intentar iniciar la detección ArUco (CÁMARA)
+        // 1) Intentar iniciar la detección ArUco (cámara)
         try {
           // Primero probamos con la cámara 1 (trasera en muchos dispositivos)
           Protobject.Aruco.start(60, 1);
@@ -81,20 +81,6 @@
           }
         }
 
-        // 2) Intentar mostrar la vista previa, PERO si falla seguimos sin ella
-        try {
-          Protobject.Aruco.showPreview({
-            top: 0,
-            left: 0,
-            width: window.innerWidth,
-            height: window.innerHeight
-          });
-          console.log("✅ showPreview OK");
-        } catch (ePreview) {
-          console.warn("⚠️ Error en showPreview (ignorando vista previa):", ePreview);
-          // No hacemos return aquí: dejamos la cámara funcionando aunque no se vea
-        }
-
         if (!started) {
           statusDiv.textContent = "No se pudo iniciar la cámara.";
           statusDiv.style.background = "rgba(128,0,0,0.8)";
@@ -104,7 +90,7 @@
         statusDiv.textContent = "Cámara lista, apunta un código ArUco.";
         statusDiv.style.background = "rgba(0,0,0,0.6)";
 
-        // 3) Callback de detección
+        // 2) Callback de detección (aunque no veamos el video)
         Protobject.Aruco.onData((data) => {
           const ids = Object.keys(data).map(id => Number(id));
           console.log("📷 ArUco data:", data, "IDs:", ids);
