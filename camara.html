@@ -94,6 +94,7 @@
       console.log("📷 ArUco data:", data, "IDs:", ids);
 
       if (ids.length > 0) {
+        playAudioForArucoIDs(ids);              // 👈 sonido AHORA desde la cámara
         Protobject.Core.send(ids).to("index.html");
         statusDiv.textContent = "Detectado: " + ids.join(", ");
         statusDiv.style.background = "rgba(0,128,0,0.6)";
@@ -103,7 +104,70 @@
         statusDiv.style.background = "rgba(0,0,0,0.6)";
       }
     });
+
+      // ================= AUDIO VAN GOGH EN LA CÁMARA =================
+
+  // Necesitamos también el JSON aquí para saber el Year
+  let data_van_gogh = [];
+  let isDataLoaded  = false;
+
+  fetch('van_gogh_filtrado.json')
+    .then(r => r.json())
+    .then(d => {
+      data_van_gogh = d;
+      isDataLoaded  = true;
+      console.log("✅ JSON audio cargado en camara.html");
+    })
+    .catch(e => console.error("Error JSON audio (camara):", e));
+
+// Caché para evitar repetir sonidos
+  let lastAudioKey = "";
+
+  // Reproductor de audio
+  const audioPlayer = new Audio();
+  audioPlayer.volume = 1.0;
+
+  // Función: según el año devuelve qué audio debe sonar
+  function getAudioForYear(year) {
+    if (year === 1885) return "1885.MP3";
+    if (year === 1886) return "1886.MP3";
+    if (year === 1887) return "1887.MP3";
+    if (year === 1888) return "1888.MP3";
+    if (year === 1889) return "1889.MP3";
+    if (year === 1890) return "1890.MP3";
+    // Si quieres un default:
+    // return "default.MP3";
   }
+
+  // Función principal: revisa los IDs detectados y dispara audio
+  function playAudioForArucoIDs(ids) {
+    if (!isDataLoaded || ids.length === 0) return;
+
+    // Encontrar artworks según los IDs
+    const artworks = ids.map(id =>
+      data_van_gogh.find(item => Number(item.ArucoID) === Number(id))
+    ).filter(Boolean);
+
+    if (artworks.length === 0) return;
+
+    // Tomamos el año MÁS ANTIGUO como referencia
+    const year = Math.min(...artworks.map(a => a.Year));
+    const audioSrc = getAudioForYear(year);
+    if (!audioSrc) return;
+
+    // Evitar repetir sonido si es la misma combinación
+    const newKey = ids.slice().sort((a,b)=>a-b).join(",") + "-" + year;
+    if (newKey === lastAudioKey) return;
+    lastAudioKey = newKey;
+
+    audioPlayer.src = audioSrc;
+    audioPlayer.play().catch(err => {
+      console.warn("⚠️ No se pudo reproducir audio:", err);
+    });
+  }
+
+  }
+
 
   startBtn.addEventListener("click", initAruco);
 </script>
