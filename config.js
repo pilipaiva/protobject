@@ -1,14 +1,15 @@
 Protobject.setProduction(false);
+
 Protobject.initialize([
   { 
-    name: "Luz_VanGogh",           // AHORA ES EL MASTER
+    name: "Camara_Aruco",      // AHORA el index es la CÁMARA
     page: "index.html",
-    main: true,                    // <--- Importante
+    main: true,                // El botón + aparece AQUÍ
     debug: "master",
   },
   { 
-    name: "Camara_Aruco",          // AHORA ES EL ESCLAVO/CLIENTE
-    page: "camara.html",  
+    name: "Luz_VanGogh",       // La LUZ ahora está en camara.html
+    page: "camara.html",
     debug: "local",
   }
 ]);
