@@ -187,6 +187,55 @@
 
     const MEMORY_WINDOW  = 10000; // 10 segundos para mezclar códigos seguidos
 
+
+// =========================================================
+//              ⏺️  SISTEMA DE AUDIO POR AÑO
+// =========================================================
+
+// Caché para evitar repetir sonidos
+let lastAudioKey = "";
+
+// Cargador de audios
+const audioPlayer = new Audio();
+audioPlayer.volume = 1.0;
+
+// Función: según el año devuelve qué audio debe sonar
+function getAudioForYear(year) {
+  if (year === 1885) return "1885.MP3";
+  if (year === 1886) return "1886.MP3";
+  if (year === 1887) return "1887.MP3";
+  if (year === 1888) return "1888.MP3";
+  if (year === 1889) return "1889.MP3";
+}
+
+// Función principal: revisa los IDs activos y dispara audio
+function playAudioForArucoIDs(ids) {
+  if (!isDataLoaded || ids.length === 0) return;
+
+  // Encontrar artworks según los IDs
+  const artworks = ids.map(id =>
+    data_van_gogh.find(item => Number(item.ArucoID) === Number(id))
+  ).filter(Boolean);
+
+  if (artworks.length === 0) return;
+
+  // Tomamos el año MÁS ANTIGUO como referencia (o puedes cambiar lógica)
+  const year = Math.min(...artworks.map(a => a.Year));
+
+  const audioSrc = getAudioForYear(year);
+
+  // Evitar repetir sonido si es la misma combinación
+  const newKey = ids.sort((a,b)=>a-b).join(",") + "-" + year;
+  if (newKey === lastAudioKey) return;
+  lastAudioKey = newKey;
+
+  // Reproducir audio
+  audioPlayer.src = audioSrc;
+  audioPlayer.play().catch(err => {
+    console.warn("⚠️ No se pudo reproducir audio:", err);
+  });
+}
+
     Protobject.Core.onReceived(function(message) {
         console.log("💡 Luz recibió mensaje:", message);
 
@@ -245,6 +294,9 @@
         // IDs activos en la ventana de 10 segundos
         const activeIds = Object.keys(lastSeenMap).map(x => Number(x));
         console.log("🧠 IDs activos en últimos 10s:", activeIds);
+
+        playAudioForArucoIDs(activeIds);
+
 
         if (activeIds.length === 0) {
             // Muy raro, pero por si acaso: apagamos
