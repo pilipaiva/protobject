@@ -17,8 +17,7 @@
     "Genre":"still life",
     "Style":"Realism",
     "Link":"https:\/\/uploads0.wikiart.org\/images\/vincent-van-gogh\/still-life-with-bible.jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 2
+    "Show": "True"
 
   },
 
@@ -30,7 +29,7 @@
     "Style":"Realism",
     "Link":"https:\/\/uploads3.wikiart.org\/images\/vincent-van-gogh\/skull-with-burning-cigarette-1885.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 3
+    "ArucoID" : 6
   },
 
  
@@ -42,7 +41,7 @@
     "Style":"Realism",
     "Link":"https:\/\/uploads4.wikiart.org\/images\/vincent-van-gogh\/still-life-with-apples-meat-and-a-roll-1886.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 4
+    "ArucoID": 7
   },
   {
     "Name":"Still Life with Bloaters",
@@ -51,8 +50,7 @@
     "Genre":"still life",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads1.wikiart.org\/images\/vincent-van-gogh\/still-life-with-bloaters-1886-1.jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 5
+    "Show": "True"
   },
   {
     "Name":"Self-Portrait",
@@ -62,7 +60,7 @@
     "Style":"Realism",
     "Link":"https:\/\/uploads6.wikiart.org\/images\/vincent-van-gogh\/self-portrait-1886.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 6
+    "ArucoID": 2
   },
  
 
@@ -74,7 +72,7 @@
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads0.wikiart.org\/00213\/images\/vincent-van-gogh\/antique-3840752.jpg!Large.jpg", 
     "Show": "True",
-    "ArucoID": 7
+    "ArucoID": 3
   },
 
   {
@@ -85,7 +83,7 @@
     "Style":"Neo-Impressionism",
     "Link":"https:\/\/uploads5.wikiart.org\/images\/vincent-van-gogh\/moored-boats-1887.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 8
+    "ArucoID": 0
   },
   {
     "Name":"Still Life with Two Sunflowers",
@@ -105,7 +103,7 @@
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads5.wikiart.org\/images\/vincent-van-gogh\/still-life-vase-with-fifteen-sunflowers-1888.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 9
+    "ArucoID": 4
   },
   {
     "Name":"Vincent's Bedroom in Arles",
@@ -115,7 +113,7 @@
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads1.wikiart.org\/images\/vincent-van-gogh\/vincent-s-bedroom-in-arles-1888.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 10
+    "ArucoID": 5
   },
   {
     "Name":"Café Terrace at Night (Place du Forum, Arles)",
@@ -124,8 +122,7 @@
     "Genre":"cityscape",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads2.wikiart.org\/images\/vincent-van-gogh\/cafe-terrace-place-du-forum-arles-1888(1).jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 11
+    "Show": "True"
   },
 
   {
@@ -135,8 +132,7 @@
     "Genre":"cityscape",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads0.wikiart.org\/images\/vincent-van-gogh\/the-yellow-house-1888.jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 12
+    "Show": "True"
   },
 
   {
@@ -147,7 +143,7 @@
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads4.wikiart.org\/00142\/images\/vincent-van-gogh\/the-starry-night.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 13
+    "ArucoID": 9
   },
   {
     "Name":"Irises",
@@ -156,8 +152,7 @@
     "Genre":"landscape",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads0.wikiart.org\/00213\/images\/vincent-van-gogh\/antique-3840759.jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 14
+    "Show": "True"
   },
   {
     "Name":"Wheat Field with Cypresses at the Haude Galline near Eygalieres",
@@ -166,8 +161,7 @@
     "Genre":"landscape",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads4.wikiart.org\/images\/vincent-van-gogh\/wheat-field-with-cypresses-at-the-haude-galline-near-eygalieres-1889-2.jpg!Large.jpg",
-    "Show":"True",
-    "ArucoID": 15
+    "Show":"True"
   },
 
   {
@@ -177,8 +171,7 @@
     "Genre":"self-portrait",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads8.wikiart.org\/images\/vincent-van-gogh\/self-portrait-1889-1.jpg!Large.jpg",
-    "Show":"True",
-    "ArucoID": 16
+    "Show":"True"
   },
  
   {
@@ -189,7 +182,7 @@
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads6.wikiart.org\/images\/vincent-van-gogh\/self-portrait-with-bandaged-ear-1889.jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 17
+    "ArucoID": 10
   },
 
   {
@@ -200,7 +193,7 @@
     "Style":"Japonism",
     "Link":"https:\/\/uploads6.wikiart.org\/images\/vincent-van-gogh\/branches-with-almond-blossom-1890(1).jpg!Large.jpg",
     "Show": "True",
-    "ArucoID": 18
+    "ArucoID": 11
   },
   {
     "Name":"The Church at Auvers",
@@ -209,8 +202,7 @@
     "Genre":"cityscape",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads4.wikiart.org\/images\/vincent-van-gogh\/the-church-at-auvers-1890.jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 19
+    "Show": "True"
   },
   {
     "Name":"Green Wheat Fields",
@@ -219,8 +211,7 @@
     "Genre":"landscape",
     "Style":"Post-Impressionism",
     "Link":"https:\/\/uploads5.wikiart.org\/images\/vincent-van-gogh\/green-wheat-fields-1890(1).jpg!Large.jpg",
-    "Show": "True",
-    "ArucoID": 20
+    "Show": "True"
   },
   {
     "Name":"Old Man in Sorrow (On the Threshold of Eternity)",
